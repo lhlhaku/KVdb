@@ -10,6 +10,7 @@ type LogRecordType = byte
 const (
 	LogRecordNormal LogRecordType = iota
 	LogRecordDeleted
+	LogRecordTxnFinished
 )
 
 // crc type keySize valueSize
@@ -38,6 +39,12 @@ type LogRecordPos struct {
 	Offset int64  // 偏移，表示将数据存储到了数据文件中的哪个位置
 }
 
+// TransactionRecord 暂存的事务相关的数据
+type TransactionRecord struct {
+	Record *LogRecord
+	Pos    *LogRecordPos
+}
+
 // EncodeLogRecord 对 LogRecord 进行编码，返回字节数组及长度
 //
 //	+-------------+-------------+-------------+--------------+-------------+--------------+
@@ -53,7 +60,6 @@ func EncodeLogRecord(logRecord *LogRecord) ([]byte, int64) {
 	var index = 5
 	// 5 字节之后，存储的是 key 和 value 的长度信息
 	// 使用变长类型，节省空间
-
 	index += binary.PutVarint(header[index:], int64(len(logRecord.Key)))
 	index += binary.PutVarint(header[index:], int64(len(logRecord.Value)))
 
@@ -69,9 +75,26 @@ func EncodeLogRecord(logRecord *LogRecord) ([]byte, int64) {
 	// 对整个 LogRecord 的数据进行 crc 校验
 	crc := crc32.ChecksumIEEE(encBytes[4:])
 	binary.LittleEndian.PutUint32(encBytes[:4], crc)
-	//fmt.Printf("header length:%d\n,crc:%d\n", index, crc)
 
 	return encBytes, int64(size)
+}
+
+// EncodeLogRecordPos 对位置信息进行编码
+func EncodeLogRecordPos(pos *LogRecordPos) []byte {
+	buf := make([]byte, binary.MaxVarintLen32+binary.MaxVarintLen64)
+	var index = 0
+	index += binary.PutVarint(buf[index:], int64(pos.Fid))
+	index += binary.PutVarint(buf[index:], pos.Offset)
+	return buf[:index]
+}
+
+// DecodeLogRecordPos 解码 LogRecordPos
+func DecodeLogRecordPos(buf []byte) *LogRecordPos {
+	var index = 0
+	fileId, n := binary.Varint(buf[index:])
+	index += n
+	offset, _ := binary.Varint(buf[index:])
+	return &LogRecordPos{Fid: uint32(fileId), Offset: offset}
 }
 
 // 对字节数组中的 Header 信息进行解码
@@ -87,9 +110,7 @@ func decodeLogRecordHeader(buf []byte) (*logRecordHeader, int64) {
 
 	var index = 5
 	// 取出实际的 key size
-	// binary.Varint从buf中解码出一个int64类型的变量
 	keySize, n := binary.Varint(buf[index:])
-
 	header.keySize = uint32(keySize)
 	index += n
 
