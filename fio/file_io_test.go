@@ -14,9 +14,9 @@ func destroyFile(name string) {
 }
 
 func TestNewFileIOManager(t *testing.T) {
-	path := filepath.Join("D:\\AllProject\\go-learning\\KVdb\\temp", "a.data")
+	path := filepath.Join("D:\\AllProject\\go-learning\\KVdb", "a.data")
 	fio, err := NewFileIOManager(path)
-	defer destroyFile(path)
+	//defer destroyFile(path)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, fio)
@@ -25,7 +25,7 @@ func TestNewFileIOManager(t *testing.T) {
 }
 
 func TestFileIO_Write(t *testing.T) {
-	path := filepath.Join("D:\\AllProject\\go-learning\\KVdb\\temp", "a.data")
+	path := filepath.Join("D:\\AllProject\\go-learning\\KVdb", "a.data")
 	fio, err := NewFileIOManager(path)
 	defer destroyFile(path)
 

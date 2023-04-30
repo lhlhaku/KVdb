@@ -5,6 +5,8 @@ import (
 	"hash/crc32"
 )
 
+// LogRecordPos 数据内存索引，主要是描述数据在磁盘上的位置
+
 type LogRecordType = byte
 
 const (

@@ -13,9 +13,12 @@ var (
 	ErrInvalidCRC = errors.New("invalid crc value, log record maybe corrupted")
 )
 
-const DataFileNameSuffix = ".data"
-const HintFileName = "hint-index"
-const MergeFinishedFileName = "merge-finished"
+const (
+	DataFileNameSuffix    = ".data"
+	HintFileName          = "hint-index"
+	MergeFinishedFileName = "merge-finished"
+	SeqNoFileName         = "seq-no"
+)
 
 // DataFile 数据文件
 type DataFile struct {
@@ -35,6 +38,12 @@ func OpenMergeFinishedFile(dirPath string) (*DataFile, error) {
 	fileName := filepath.Join(dirPath, MergeFinishedFileName)
 	return newDataFile(fileName, 0)
 
+}
+
+// OpenSeqNoFile 存储事务序列号的文件
+func OpenSeqNoFile(dirPath string) (*DataFile, error) {
+	fileName := filepath.Join(dirPath, SeqNoFileName)
+	return newDataFile(fileName, 0)
 }
 
 func GetDataFileName(dirPath string, fileId uint32) string {

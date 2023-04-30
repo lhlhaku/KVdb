@@ -23,6 +23,8 @@ func NewBTree() *BTree {
 	}
 }
 
+// 对相同的key插入不同的value值会覆盖
+
 func (bt *BTree) Put(key []byte, pos *data.LogRecordPos) bool {
 	it := &Item{key: key, pos: pos}
 	bt.lock.Lock()
@@ -37,6 +39,7 @@ func (bt *BTree) Get(key []byte) *data.LogRecordPos {
 	if btreeItem == nil {
 		return nil
 	}
+	// 此时btreeItem是 BTree.Item接口类型 需要再转换成我们实现类的类型
 	return btreeItem.(*Item).pos
 }
 
@@ -98,11 +101,11 @@ func newBTreeIterator(tree *btree.BTree, reverse bool) *btreeIterator {
 	}
 }
 
-func (bti *btreeIterator) Rewind() {
+func (bti *btreeIterator) Rewind() { //重新回到迭代器的起点，即第一个数据
 	bti.currIndex = 0
 }
 
-func (bti *btreeIterator) Seek(key []byte) {
+func (bti *btreeIterator) Seek(key []byte) { // Seek 根据传入的 key 查找到第一个大于（或小于）等于的目标 key，根据从这个 key 开始遍历
 	if bti.reverse {
 		bti.currIndex = sort.Search(len(bti.values), func(i int) bool {
 			return bytes.Compare(bti.values[i].key, key) <= 0
@@ -114,7 +117,7 @@ func (bti *btreeIterator) Seek(key []byte) {
 	}
 }
 
-func (bti *btreeIterator) Next() {
+func (bti *btreeIterator) Next() { // Next 跳转到下一个 key
 	bti.currIndex += 1
 }
 

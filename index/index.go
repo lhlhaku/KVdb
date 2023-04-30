@@ -41,14 +41,14 @@ const (
 )
 
 // NewIndexer 根据类型初始化索引
-func NewIndexer(typ IndexType) Indexer {
+func NewIndexer(typ IndexType, dirPath string, sync bool) Indexer {
 	switch typ {
 	case Btree:
 		return NewBTree()
-	//case ART:
-	//	return NewART()
-	//case BPTree:
-	//	return NewBPlusTree(dirPath, sync)
+	case ART:
+		return NewART()
+	case BPTree:
+		return NewBPlusTree(dirPath, sync)
 	default:
 		panic("unsupported index type")
 	}

@@ -12,8 +12,17 @@ func TestBTree_Put(t *testing.T) {
 	res1 := bt.Put(nil, &data.LogRecordPos{Fid: 1, Offset: 100})
 	assert.True(t, res1)
 
-	res2 := bt.Put([]byte("a"), &data.LogRecordPos{Fid: 1, Offset: 2})
+	res2 := bt.Put(nil, &data.LogRecordPos{Fid: 1, Offset: 200})
 	assert.True(t, res2)
+
+	res4 := bt.Get(nil)
+	t.Log(res4)
+
+	res5 := bt.Size()
+	t.Log(res5)
+
+	res3 := bt.Put([]byte("a"), &data.LogRecordPos{Fid: 1, Offset: 2})
+	assert.True(t, res3)
 }
 
 func TestBTree_Get(t *testing.T) {
@@ -42,6 +51,8 @@ func TestBTree_Delete(t *testing.T) {
 	assert.True(t, res1)
 	res2 := bt.Delete(nil)
 	assert.True(t, res2)
+	res5 := bt.Size()
+	t.Log(res5)
 
 	res3 := bt.Put([]byte("aaa"), &data.LogRecordPos{Fid: 22, Offset: 33})
 	assert.True(t, res3)

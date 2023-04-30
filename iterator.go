@@ -63,6 +63,7 @@ func (it *Iterator) Close() {
 	it.indexIter.Close()
 }
 
+//筛选过滤条件
 func (it *Iterator) skipToNext() {
 	prefixLen := len(it.options.Prefix)
 	if prefixLen == 0 {
