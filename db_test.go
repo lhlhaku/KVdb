@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+	"time"
 )
 
 // 测试完成之后销毁 DB 数据目录
@@ -321,15 +322,15 @@ func TestDB_FileLock(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-//func TestDB_OpenMMap(t *testing.T) {
-//	opts := DefaultOptions
-//	opts.DirPath = "/tmp/bitcask-go"
-//	opts.MMapAtStartup = false
-//
-//	now := time.Now()
-//	db, err := Open(opts)
-//	t.Log("open time ", time.Since(now))
-//
-//	assert.Nil(t, err)
-//	assert.NotNil(t, db)
-//}
+func TestDB_OpenMMap(t *testing.T) {
+	opts := DefaultOptions
+	opts.DirPath = "/tmp/bitcask-go"
+	opts.MMapAtStartup = false
+
+	now := time.Now()
+	db, err := Open(opts)
+	t.Log("open time ", time.Since(now))
+
+	assert.Nil(t, err)
+	assert.NotNil(t, db)
+}
