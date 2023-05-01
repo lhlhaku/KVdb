@@ -23,14 +23,15 @@ func NewBTree() *BTree {
 	}
 }
 
-// 对相同的key插入不同的value值会覆盖
-
-func (bt *BTree) Put(key []byte, pos *data.LogRecordPos) bool {
+func (bt *BTree) Put(key []byte, pos *data.LogRecordPos) *data.LogRecordPos {
 	it := &Item{key: key, pos: pos}
 	bt.lock.Lock()
-	bt.tree.ReplaceOrInsert(it)
+	oldItem := bt.tree.ReplaceOrInsert(it)
 	bt.lock.Unlock()
-	return true
+	if oldItem == nil {
+		return nil
+	}
+	return oldItem.(*Item).pos
 }
 
 func (bt *BTree) Get(key []byte) *data.LogRecordPos {
@@ -39,19 +40,18 @@ func (bt *BTree) Get(key []byte) *data.LogRecordPos {
 	if btreeItem == nil {
 		return nil
 	}
-	// 此时btreeItem是 BTree.Item接口类型 需要再转换成我们实现类的类型
 	return btreeItem.(*Item).pos
 }
 
-func (bt *BTree) Delete(key []byte) bool {
+func (bt *BTree) Delete(key []byte) (*data.LogRecordPos, bool) {
 	it := &Item{key: key}
 	bt.lock.Lock()
 	oldItem := bt.tree.Delete(it)
 	bt.lock.Unlock()
 	if oldItem == nil {
-		return false
+		return nil, false
 	}
-	return true
+	return oldItem.(*Item).pos, true
 }
 
 func (bt *BTree) Size() int {
@@ -101,11 +101,11 @@ func newBTreeIterator(tree *btree.BTree, reverse bool) *btreeIterator {
 	}
 }
 
-func (bti *btreeIterator) Rewind() { //重新回到迭代器的起点，即第一个数据
+func (bti *btreeIterator) Rewind() {
 	bti.currIndex = 0
 }
 
-func (bti *btreeIterator) Seek(key []byte) { // Seek 根据传入的 key 查找到第一个大于（或小于）等于的目标 key，根据从这个 key 开始遍历
+func (bti *btreeIterator) Seek(key []byte) {
 	if bti.reverse {
 		bti.currIndex = sort.Search(len(bti.values), func(i int) bool {
 			return bytes.Compare(bti.values[i].key, key) <= 0
@@ -117,7 +117,7 @@ func (bti *btreeIterator) Seek(key []byte) { // Seek 根据传入的 key 查找�
 	}
 }
 
-func (bti *btreeIterator) Next() { // Next 跳转到下一个 key
+func (bti *btreeIterator) Next() {
 	bti.currIndex += 1
 }
 

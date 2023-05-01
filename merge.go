@@ -2,6 +2,7 @@ package KVdb
 
 import (
 	"KVdb/data"
+	"KVdb/utils"
 	"io"
 	"os"
 	"path"
@@ -27,6 +28,29 @@ func (db *DB) Merge() error {
 		db.mu.Unlock()
 		return ErrMergeIsProgress
 	}
+
+	// 查看可以 merge 的数据量是否达到了阈值
+	totalSize, err := utils.DirSize(db.options.DirPath)
+	if err != nil {
+		db.mu.Unlock()
+		return err
+	}
+	if float32(db.reclaimSize)/float32(totalSize) < db.options.DataFileMergeRatio {
+		db.mu.Unlock()
+		return ErrMergeRatioUnreached
+	}
+
+	// 查看剩余的空间容量是否可以容纳 merge 之后的数据量
+	availableDiskSize, err := utils.AvailableDiskSize()
+	if err != nil {
+		db.mu.Unlock()
+		return err
+	}
+	if uint64(totalSize-db.reclaimSize) >= availableDiskSize {
+		db.mu.Unlock()
+		return ErrNoEnoughSpaceForMerge
+	}
+
 	db.isMerging = true
 	defer func() {
 		db.isMerging = false
@@ -52,7 +76,7 @@ func (db *DB) Merge() error {
 	for _, file := range db.olderFiles {
 		mergeFiles = append(mergeFiles, file)
 	}
-	db.mu.Unlock() //此时用户可以正常写入和操作了
+	db.mu.Unlock()
 
 	//	待 merge 的文件从小到大进行排序，依次 merge
 	sort.Slice(mergeFiles, func(i, j int) bool {
@@ -172,16 +196,15 @@ func (db *DB) loadMergeFiles() error {
 	var mergeFinished bool
 	var mergeFileNames []string
 	for _, entry := range dirEntries {
-
-		//这个文件是保存Merge完成的最新文件id，不需要进行merge
 		if entry.Name() == data.MergeFinishedFileName {
 			mergeFinished = true
 		}
-		//这个文件是加载事务号的文件，不需要进行merge
 		if entry.Name() == data.SeqNoFileName {
 			continue
 		}
-
+		if entry.Name() == fileLockName {
+			continue
+		}
 		mergeFileNames = append(mergeFileNames, entry.Name())
 	}
 
@@ -234,8 +257,7 @@ func (db *DB) getNonMergeFileId(dirPath string) (uint32, error) {
 }
 
 // 从 hint 文件中加载索引
-
-func (db *DB) loadIndexFromHintFiles() error {
+func (db *DB) loadIndexFromHintFile() error {
 	// 查看 hint 索引文件是否存在
 	hintFileName := filepath.Join(db.options.DirPath, data.HintFileName)
 	if _, err := os.Stat(hintFileName); os.IsNotExist(err) {
