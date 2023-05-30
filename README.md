@@ -1,7 +1,7 @@
 # KV项目介绍
 
 ### go benchmark基准测试结果
-![benchmark](https://github.com/lhlhaku/KVdb/blob/master/images/benchmark.png)
+![benchmark](benchmark.png)
 
 ### 为什么用Go写：
 
