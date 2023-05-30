@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="RemoteTargetsManager">
+    <option name="projectDefaultTargetUuid" value="9c311ffa-a6ae-46e6-a72b-6563a9251cae" />
     <targets>
-      <target name="WSL - Ubuntu-20.04" type="wsl" uuid="9c311ffa-a6ae-46e6-a72b-6563a9251cae">
+      <target name="WSL - Ubuntu-22.04" type="wsl" uuid="934f63ec-b2ed-4f67-92d1-daacd5c0a0ac">
         <config>
-          <option name="distributionMsId" value="Ubuntu-20.04" />
+          <option name="distributionMsId" value="Ubuntu-22.04" />
           <option name="projectRootOnTarget" value="/mnt/d/Program Files/JetBrains/GoLand 2022.2.1/jbr/bin&#10;/KVdb" />
         </config>
         <ContributedStateBase type="GoLanguageRuntime">
           <config>
-            <option name="goPath" value="/home/haku/goProject" />
-            <option name="goRoot" value="/usr/local/go" />
+            <option name="goPath" value="/home/haku/go" />
+            <option name="goRoot" value="/usr/local/go/bin/go" />
           </config>
         </ContributedStateBase>
       </target>
