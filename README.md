@@ -1,7 +1,7 @@
 # KV项目介绍
 
 ### go benchmark基准测试结果
-https://github.com/lhlhaku/KVdb/blob/master/go%20benchmark%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C.png
+![benchmark](https://github.com/lhlhaku/KVdb/blob/master/images/benchmark.png)
 
 ### 为什么用Go写：
 
